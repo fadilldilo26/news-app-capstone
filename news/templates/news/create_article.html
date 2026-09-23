@@ -1,0 +1,47 @@
+{% extends "news/base.html" %}
+
+{% block title %}Create Article - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="mb-4">Write a New Article</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Article Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required placeholder="Enter your headline here...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="publisher" class="form-label fw-bold">Publication (Optional)</label>
+                            <select class="form-select" id="publisher" name="publisher">
+                                <option value="">-- Select a Publication --</option>
+                                {% for pub in publishers %}
+                                    <option value="{{ pub.id }}">{{ pub.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Select the publication this article belongs to.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label fw-bold">Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="12" required placeholder="Write your story here..."></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4">Submit Article</button>
+                            <a href="{% url 'article-list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

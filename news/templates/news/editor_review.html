@@ -1,0 +1,34 @@
+{% extends "news/base.html" %}
+
+{% block title %}Review Articles - NewsApp{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 1.5rem;">📋 Editor Review Queue</h1>
+<p style="margin-bottom: 1.5rem; color: #666;">Articles pending your approval:</p>
+
+{% if pending_articles %}
+    {% for article in pending_articles %}
+    <div class="card">
+        <h2>{{ article.title }}</h2>
+        <div class="article-meta">
+            By <strong>{{ article.author.username }}</strong> | 
+            {% if article.publisher %}{{ article.publisher.name }}{% else %}Independent{% endif %} |
+            Submitted: {{ article.created_at|date:"M d, Y H:i" }}
+        </div>
+        <div class="article-content">{{ article.content|truncatewords:40 }}</div>
+        
+        <div style="margin-top: 1rem;">
+            <a href="{% url 'article-detail' article.id %}" class="btn btn-primary">View Full Article</a>
+            <form method="post" action="{% url 'article-approve' article.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">✅ Approve</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <p>🎉 No articles pending review. Great job!</p>
+    </div>
+{% endif %}
+{% endblock %}

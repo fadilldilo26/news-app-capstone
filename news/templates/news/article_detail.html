@@ -1,0 +1,32 @@
+{% extends "news/base.html" %}
+
+{% block title %}{{ article.title }} - NewsApp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>{{ article.title }}</h1>
+    <div class="article-meta" style="font-size: 1.1rem; margin: 1rem 0;">
+        By <strong>{{ article.author.username }}</strong> | 
+        {% if article.publisher %}{{ article.publisher.name }}{% else %}Independent{% endif %} |
+        {{ article.created_at|date:"F d, Y" }}
+        <span class="badge {% if article.approved %}badge-approved{% else %}badge-pending{% endif %}">
+            {% if article.approved %}✅ Approved{% else %}⏳ Pending Review{% endif %}
+        </span>
+    </div>
+    <div class="article-content" style="font-size: 1.1rem; line-height: 1.8;">
+        {{ article.content }}
+    </div>
+    
+    {% if user.role == 'editor' and not article.approved %}
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #eee;">
+        <h3>Editor Actions</h3>
+        <form method="post" action="{% url 'article-approve' article.id %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">✅ Approve Article</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <a href="{% url 'article-list' %}" class="btn btn-primary" style="margin-top: 1rem;">← Back to Articles</a>
+</div>
+{% endblock %}

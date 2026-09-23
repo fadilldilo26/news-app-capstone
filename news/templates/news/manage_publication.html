@@ -1,0 +1,66 @@
+{% extends "news/base.html" %}
+
+{% block title %}Manage {{ publication.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Publication: {{ publication.name }}</h2>
+    <p class="text-muted">Assign editors and journalists to work on this publication.</p>
+
+    <div class="row">
+        <div class="col-md-12">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Assign Editors Column -->
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Assign Editors</h5>
+                            </div>
+                            <div class="card-body">
+                                <select name="editors" multiple class="form-control" size="10">
+                                    {% for editor in available_editors %}
+                                        <option value="{{ editor.id }}" 
+                                            {% if editor in publication.assigned_editors.all %}selected{% endif %}>
+                                            {{ editor.username }} ({{ editor.get_full_name|default:"No Name" }})
+                                        </option>
+                                    {% empty %}
+                                        <option disabled>No editors registered yet</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Hold Ctrl/Cmd to select multiple.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assign Journalists Column -->
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Assign Journalists</h5>
+                            </div>
+                            <div class="card-body">
+                                <select name="journalists" multiple class="form-control" size="10">
+                                    {% for journalist in available_journalists %}
+                                        <option value="{{ journalist.id }}"
+                                            {% if journalist in publication.assigned_journalists.all %}selected{% endif %}>
+                                            {{ journalist.username }} ({{ journalist.get_full_name|default:"No Name" }})
+                                        </option>
+                                    {% empty %}
+                                        <option disabled>No journalists registered yet</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Hold Ctrl/Cmd to select multiple.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-lg btn-dark">Save Staff Assignments</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

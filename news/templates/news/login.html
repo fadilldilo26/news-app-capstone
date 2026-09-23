@@ -1,0 +1,25 @@
+{% extends "news/base.html" %}
+
+{% block title %}Login - NewsApp{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 3rem auto;">
+    <h1 style="text-align: center; margin-bottom: 1.5rem;"> Login</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Username:</label>
+            <input type="text" name="username" required 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
+            <input type="password" name="password" required 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+    </div>
+</form>
+<p style="text-align: center; margin-top: 15px;">Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+{% endblock %}
