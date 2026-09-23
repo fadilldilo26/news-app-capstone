@@ -17,7 +17,7 @@ Clone the repository:
 bash
 1
 2
-git clone https://github.com/fadlildlo26/news-app-capstone.git
+git clone https://github.com/fadilldilo26/news-app-capstone.git
     cd news-app-capstone
 2.
 Create and activate a virtual environment:
