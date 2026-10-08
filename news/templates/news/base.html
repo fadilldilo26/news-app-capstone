@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}News App{% endblock %}</title>
+    <style>
+        /* Global Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; color: #333; line-height: 1.6; }
+
+        /* Navigation Bar */
+        nav { background-color: #1a2332; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #d4af37; text-decoration: none; }
+        nav a { color: white; text-decoration: none; margin-left: 1.5rem; transition: color 0.3s ease; }
+        nav a:hover { color: #d4af37; }
+
+        /* Role-Specific Buttons in Nav */
+        .nav-btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; margin-left: 1rem; text-decoration: none; color: white; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; color: white; }
+        .btn-warning { background-color: #ffc107; color: #333; }
+        .btn-warning:hover { background-color: #e0a800; color: #333; }
+        .btn-info { background-color: #17a2b8; }
+        .btn-info:hover { background-color: #138496; color: white; }
+
+        /* Main Content Container */
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* Cards */
+        .card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .card h2 { color: #1a2332; margin-bottom: 0.5rem; }
+        .card p { color: #666; line-height: 1.6; }
+
+        /* Buttons */
+        .btn { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 4px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; transition: opacity 0.3s ease; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background-color: #d4af37; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+
+        /* Status Badges */
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .badge-pending { background-color: #ffc107; color: #333; }
+        .badge-approved { background-color: #28a745; color: white; }
+
+        /* Messages */
+        .messages { list-style: none; padding: 0; margin-bottom: 1rem; }
+        .messages li { padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 0.5rem; }
+        .messages .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .messages .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Article Meta */
+        .article-meta { color: #888; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <!-- FIXED: Hardcoded path to prevent API redirect -->
+            <a href="/articles/" class="logo"> NewsApp</a>
+            
+            {% if user.is_authenticated %}
+                <a href="/articles/">Articles</a>
+                
+                <!-- Journalist Links -->
+                {% if user.role == 'journalist' %}
+                    <a href="{% url 'create-article' %}">Write Article</a>
+                {% endif %}
+                
+                <!-- Editor & Journalist Links -->
+                {% if user.role == 'editor' or user.role == 'journalist' %}
+                    <a href="/newsletters/">Newsletters</a>
+                {% endif %}
+                
+                <!-- Editor Links -->
+                {% if user.role == 'editor' %}
+                    <a href="{% url 'editor-review' %}">Review Articles</a>
+                {% endif %}
+
+                <!-- PUBLISHER NAVIGATION SECTION -->
+{% if user.role == 'publisher' %}
+    {% with publication=user.owned_publications.first %}
+        {% if publication %}
+            <a href="{% url 'manage-publication' publication.pk %}" class="btn btn-success btn-sm nav-btn">
+                 Manage Publication
+            </a>
+        {% else %}
+            <a href="{% url 'setup-publication' %}" class="btn btn-warning btn-sm nav-btn">
+                ⚠️ Setup Publication
+            </a>
+        {% endif %}
+    {% endwith %}
+{% endif %}
+
+                <!-- READER SUBSCRIPTIONS LINK (FEEDBACK POINT #4) -->
+{% if user.role == 'reader' %}
+    <a href="{% url 'my-feed' %}" class="nav-btn btn-primary">
+        📰 My Feed
+    </a>
+    <a href="{% url 'manage-subscriptions' %}" class="nav-btn btn-info">
+        📋 My Subscriptions
+    </a>
+{% endif %}
+            {% endif %}
+        </div>
+
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }} ({{ user.get_role_display }})</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <!-- FIXED: Hardcoded paths to avoid API conflicts -->
+                <a href="/">Login</a>
+                <a href="/register/">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Page Content -->
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

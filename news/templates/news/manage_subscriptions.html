@@ -1,0 +1,90 @@
+{% extends "news/base.html" %}
+
+{% block title %}My Subscriptions - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">📬 My Subscriptions</h1>
+    <p class="text-muted mb-4">Follow your favorite publishers and journalists to get personalized news.</p>
+
+    <div class="row">
+        <!-- Publishers Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🏢 Publishers</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if publishers %}
+                        <ul class="list-group list-group-flush">
+                            {% for pub in publishers %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ pub.name }}</strong>
+                                    <br><small class="text-muted">{{ pub.description|truncatewords:10 }}</small>
+                                </div>
+                                <form method="post" action="{% url 'toggle-subscription' 'publisher' pub.id %}">
+                                    {% csrf_token %}
+                                    {% if pub.id in subscribed_publishers %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            ✖ Unsubscribe
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            ✔ Subscribe
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            No publishers available yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Journalists Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">✍️ Journalists</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if journalists %}
+                        <ul class="list-group list-group-flush">
+                            {% for journalist in journalists %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ journalist.username }}</strong>
+                                    <br><small class="text-muted">{{ journalist.get_role_display }}</small>
+                                </div>
+                                <form method="post" action="{% url 'toggle-subscription' 'journalist' journalist.id %}">
+                                    {% csrf_token %}
+                                    {% if journalist.id in subscribed_journalists %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            ✖ Unsubscribe
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            ✔ Subscribe
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            No journalists available yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

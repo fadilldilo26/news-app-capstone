@@ -1,0 +1,42 @@
+{% extends "news/base.html" %}
+
+{% block title %}{{ article.title }} - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Title -->
+            <h1 class="card-title">{{ article.title }}</h1>
+            
+            <!-- Meta Information -->
+            <div class="article-meta text-muted small mb-3">
+                By <strong>{{ article.author.username }}</strong> | 
+                {{ article.created_at|date:"F d, Y" }}
+                {% if article.publisher %}
+                    | 🏢 {{ article.publisher.name }}
+                {% endif %}
+            </div>
+
+            <!-- FIX #2: Hide Approved status badge for Readers -->
+            {% if user.role != 'reader' %}
+                {% if article.approved %}
+                    <span class="badge bg-success mb-3">✅ Approved</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark mb-3">⏳ Pending Review</span>
+                {% endif %}
+            {% endif %}
+
+            <!-- Article Content -->
+            <div class="article-content mt-4" style="line-height: 1.8;">
+                {{ article.content|linebreaks }}
+            </div>
+        </div>
+        
+        <!-- Footer / Back Button -->
+        <div class="card-footer bg-white border-top-0">
+            <a href="/articles/" class="btn btn-primary">← Back to Articles</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

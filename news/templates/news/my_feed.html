@@ -1,0 +1,37 @@
+{% extends "news/base.html" %}
+
+{% block title %}My Feed - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>📰 My Feed</h2>
+    <p class="text-muted">Articles from publishers and journalists you follow.</p>
+
+    {% if articles %}
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <p class="card-text text-muted small">
+                            By {{ article.author.username }} | {{ article.created_at|date:"M d, Y" }}
+                            {% if article.publisher %}
+                                | 🏢 {{ article.publisher.name }}
+                            {% endif %}
+                        </p>
+                        <p class="card-text">{{ article.content|truncatewords:30 }}</p>
+                        <a href="{% url 'article-detail' article.pk %}" class="btn btn-primary btn-sm">Read More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h4>No articles in your feed yet!</h4>
+            <p>Go to the <a href="{% url 'manage-subscriptions' %}">Subscriptions</a> page to follow publishers or journalists.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

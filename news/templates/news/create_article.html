@@ -1,0 +1,76 @@
+{% extends "news/base.html" %}
+
+{% block title %}Create Article - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-primary">✍️ Write a New Article</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Article Title</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="title" 
+                                   name="title" 
+                                   required 
+                                   placeholder="Enter a catchy headline...">
+                        </div>
+
+                        <!-- Publication Selection -->
+                        <div class="mb-3">
+                            <label for="publisher" class="form-label fw-bold">
+                                Publication <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            
+                            {% if publishers %}
+                                <select class="form-select" id="publisher" name="publisher">
+                                    <option value="">-- Select a Publication --</option>
+                                    {% for pub in publishers %}
+                                        <option value="{{ pub.id }}">{{ pub.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    Only publications you are assigned to are shown.
+                                </small>
+                            {% else %}
+                                <div class="alert alert-warning py-2 mb-0">
+                                    ️ You are not currently assigned to any publication. 
+                                    Please contact your publisher to be added to a team.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Content Field -->
+                        <div class="mb-4">
+                            <label for="content" class="form-label fw-bold">Content</label>
+                            <textarea class="form-control" 
+                                      id="content" 
+                                      name="content" 
+                                      rows="12" 
+                                      required 
+                                      placeholder="Write your story here..."></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                🚀 Submit Article
+                            </button>
+                            <a href="/articles/">Cancel</a>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

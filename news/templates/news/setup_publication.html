@@ -1,0 +1,36 @@
+{% extends "news/base.html" %}
+
+{% block title %}Setup Publication - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm border-0" style="max-width: 500px; margin: auto;">
+        <div class="card-body p-5 text-center">
+            <h2 class="mb-3">🏢 Setup Your Publication</h2>
+            <p class="text-muted mb-4">
+                Welcome, Publisher! Enter the details of your news publication to get started.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3 text-start">
+                    <label for="pubName" class="form-label fw-bold">Publication Name</label>
+                    <input type="text" name="name" id="pubName" class="form-control" 
+                           placeholder="e.g., The Daily Chronicle" required autofocus>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label for="pubDesc" class="form-label fw-bold">Description (Optional)</label>
+                    <textarea name="description" id="pubDesc" class="form-control" rows="3" 
+                              placeholder="A brief description of your publication..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                    ✨ Create Publication
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "news/base.html" %}
+
+{% block title %}Publisher Registration - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Register as a Publisher</h2>
+                    <p class="text-muted text-center">Create your account and start managing your own news publication.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Loop through form fields -->
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }} <!-- Django will render the input here -->
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                    <div class="alert alert-danger p-2 mt-1">
+                                        {% for error in field.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary w-100">Register as Publisher</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'custom-login' %}">Log in here</a></p>
+                        <p>Want to register as a regular user? <a href="{% url 'register' %}">Click here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

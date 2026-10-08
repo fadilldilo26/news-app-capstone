@@ -1,0 +1,38 @@
+{% extends "news/base.html" %}
+
+{% block title %}Edit Article - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-warning">✏️ Edit Article</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Title</label>
+                            <input type="text" class="form-control form-control-lg" 
+                                   id="title" name="title" value="{{ article.title }}" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="content" class="form-label fw-bold">Content</label>
+                            <textarea class="form-control" id="content" name="content" 
+                                      rows="12" required>{{ article.content }}</textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg px-4">💾 Save Changes</button>
+                            <a href="/articles/" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "news/base.html" %}
+
+{% block title %}Editor Review Queue - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">📝 Editor Review Queue</h1>
+        <span class="badge bg-primary">{{ pending_articles|length }} Pending</span>
+    </div>
+
+    <p class="text-muted mb-4">Articles submitted by journalists that require your approval before publication.</p>
+
+    {% if pending_articles %}
+        <div class="row g-4">
+            {% for article in pending_articles %}
+            <div class="col-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1 me-3">
+                                <h5 class="card-title fw-bold mb-2">{{ article.title }}</h5>
+                                
+                                <div class="text-muted small mb-3">
+                                    <span class="me-3">✍️ By {{ article.author.username }}</span>
+                                    <span class="me-3">📅 {{ article.created_at|date:"M d, Y H:i" }}</span>
+                                    {% if article.publisher %}
+                                        <span class="badge bg-info text-dark">🏢 {{ article.publisher.name }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <p class="card-text text-secondary mb-3" style="max-height: 60px; overflow: hidden;">
+                                    {{ article.content|truncatewords:30 }}
+                                </p>
+                            </div>
+
+                            <div class="d-flex flex-column gap-2 flex-shrink-0">
+                                <!-- View Full Article Button -->
+                                <a href="{% url 'article-detail-web' article.pk %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    ️ View Full Article
+                                </a>
+
+                                <!-- APPROVE BUTTON (FIXED) -->
+                                <!-- Uses 'approve-article-web' to hit the Django view, NOT the API -->
+                                <form method="post" action="{% url 'approve-article-web' article.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm w-100" 
+                                            onclick="return confirm('Are you sure you want to approve this article?');">
+                                        ✅ Approve
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <h4 class="alert-heading"> All Caught Up!</h4>
+            <p class="mb-0">There are no articles pending review at this time.</p>
+        </div>
+    {% endif %}
+    
+    <!-- Back to Articles Link -->
+    <div class="mt-4 text-center">
+        <a href="/articles/" class="btn btn-outline-secondary">← Back to Articles</a>
+    </div>
+</div>
+{% endblock %}

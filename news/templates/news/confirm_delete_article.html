@@ -1,0 +1,27 @@
+{% extends "news/base.html" %}
+
+{% block title %}Delete Article - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <h2 class="text-danger mb-3">🗑️ Delete Article?</h2>
+                    <p class="lead">Are you sure you want to delete "<strong>{{ article.title }}</strong>"?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                    
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-danger btn-lg px-4">Yes, Delete It</button>
+                            <a href="/articles/">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
