@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customuser',
             name='email',
-            field=models.EmailField(help_text='Required. A valid email address.', max_length=254, unique=True, verbose_name='email address'),
+            field=models.EmailField(
+                help_text='Required. A valid email address.',
+                max_length=254,
+                unique=True,
+                verbose_name='email address'),
         ),
     ]

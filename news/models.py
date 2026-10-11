@@ -8,11 +8,11 @@ class CustomUser(AbstractUser):
     Adds a role field and subscription relationships for Readers,
     and reverse relations for Journalists.
     """
-    
+
     # FIX: Override email field to enforce uniqueness
     email = models.EmailField(
         'email address',
-        unique=True, # <--- PREVENTS DUPLICATE EMAILS
+        unique=True,  # <--- PREVENTS DUPLICATE EMAILS
         blank=False,
         help_text='Required. A valid email address.'
     )
@@ -93,7 +93,7 @@ class CustomUser(AbstractUser):
 
 class Publisher(models.Model):
     """Represents a news publisher/publication."""
-    
+
     owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -136,14 +136,14 @@ class Article(models.Model):
     """Represents a news article authored by a journalist."""
     title = models.CharField(max_length=300)
     content = models.TextField()
-    
+
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='articles',
         help_text="The journalist who wrote this article."
     )
-    
+
     publisher = models.ForeignKey(
         Publisher,
         on_delete=models.SET_NULL,
@@ -155,7 +155,7 @@ class Article(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     approved = models.BooleanField(
         default=False,
         help_text="Whether an editor has approved this article."
@@ -173,7 +173,7 @@ class Newsletter(models.Model):
     """A curated collection of articles."""
     title = models.CharField(max_length=300)
     description = models.TextField(blank=True)
-    
+
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -181,7 +181,7 @@ class Newsletter(models.Model):
         limit_choices_to={'role__in': ['journalist', 'editor']},
         help_text="Journalist or editor who created this newsletter."
     )
-    
+
     articles = models.ManyToManyField(
         Article,
         related_name='newsletters',

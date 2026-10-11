@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
@@ -17,27 +17,30 @@ class ModelTests(TestCase):
             name='Tech Daily',
             description='Technology news'
         )
-        
+
         self.journalist = CustomUser.objects.create_user(
             username='journalist1',
+            email='journalist1@test.com',  # FIX: Added email
             password='testpass123',
             role='journalist'
         )
-        
+
         self.editor = CustomUser.objects.create_user(
             username='editor1',
+            email='editor1@test.com',  # FIX: Added email
             password='testpass123',
             role='editor'
         )
-        
+
         self.reader = CustomUser.objects.create_user(
             username='reader1',
+            email='reader1@test.com',  # FIX: Added email
             password='testpass123',
             role='reader'
         )
         self.reader.subscribed_publishers.add(self.publisher)
         self.reader.subscribed_journalists.add(self.journalist)
-        
+
         self.article = Article.objects.create(
             title='Test Article',
             content='Test content',
@@ -79,18 +82,19 @@ class ArticleApprovalSignalTest(APITestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        
+
         self.publisher = Publisher.objects.create(
             name='Tech Daily',
             description='Technology news'
         )
-        
+
         self.journalist = CustomUser.objects.create_user(
             username='journalist1',
+            email='signal_journalist@test.com',  # FIX: Added email
             password='testpass123',
             role='journalist'
         )
-        
+
         self.reader = CustomUser.objects.create_user(
             username='reader1',
             email='reader1@example.com',
@@ -98,7 +102,7 @@ class ArticleApprovalSignalTest(APITestCase):
             role='reader'
         )
         self.reader.subscribed_publishers.add(self.publisher)
-        
+
         self.article = Article.objects.create(
             title='Test Article',
             content='Test content',
@@ -109,22 +113,23 @@ class ArticleApprovalSignalTest(APITestCase):
 
     @patch('news.signals.send_mail')
     @patch('news.signals.requests.post')
-    def test_approval_triggers_email_and_api_log(self, mock_post, mock_send_mail):
+    def test_approval_triggers_email_and_api_log(
+            self, mock_post, mock_send_mail):
         """Test that approving an article triggers email and API log."""
         # Mock the requests.post response
         mock_response = MagicMock()
         mock_response.status_code = 201
         mock_post.return_value = mock_response
-        
+
         # Approve the article
         self.article.approved = True
         self.article.save()
-        
+
         # Verify email was sent
         mock_send_mail.assert_called_once()
         call_args = mock_send_mail.call_args
         self.assertIn('reader1@example.com', call_args[1]['recipient_list'])
-        
+
         # Verify API was called
         mock_post.assert_called_once()
 
@@ -134,16 +139,16 @@ class ArticleApprovalSignalTest(APITestCase):
         """Test that no email is sent when there are no subscribers."""
         # Remove subscriber
         self.reader.subscribed_publishers.remove(self.publisher)
-        
+
         # Mock the requests.post response
         mock_response = MagicMock()
         mock_response.status_code = 201
         mock_post.return_value = mock_response
-        
+
         # Approve the article
         self.article.approved = True
         self.article.save()
-        
+
         # Verify email was NOT sent
         mock_send_mail.assert_not_called()
 
@@ -154,31 +159,34 @@ class APIPermissionTests(APITestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        
+
         self.publisher = Publisher.objects.create(
             name='Tech Daily',
             description='Technology news'
         )
-        
+
         # Create users with different roles
         self.journalist = CustomUser.objects.create_user(
             username='journalist1',
+            email='perm_journalist@test.com',  # FIX: Added email
             password='testpass123',
             role='journalist'
         )
-        
+
         self.editor = CustomUser.objects.create_user(
             username='editor1',
+            email='perm_editor@test.com',  # FIX: Added email
             password='testpass123',
             role='editor'
         )
-        
+
         self.reader = CustomUser.objects.create_user(
             username='reader1',
+            email='perm_reader@test.com',  # FIX: Added email
             password='testpass123',
             role='reader'
         )
-        
+
         # Create an approved article
         self.article = Article.objects.create(
             title='Approved Article',
@@ -229,31 +237,34 @@ class SubscribedArticlesTest(APITestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        
+
         self.publisher1 = Publisher.objects.create(name='Tech Daily')
         self.publisher2 = Publisher.objects.create(name='Science Weekly')
-        
+
         self.journalist1 = CustomUser.objects.create_user(
             username='journalist1',
+            email='sub_journalist1@test.com',  # FIX: Added email
             password='testpass123',
             role='journalist'
         )
-        
+
         self.journalist2 = CustomUser.objects.create_user(
             username='journalist2',
+            email='sub_journalist2@test.com',  # FIX: Added email
             password='testpass123',
             role='journalist'
         )
-        
+
         self.reader = CustomUser.objects.create_user(
             username='reader1',
+            email='sub_reader@test.com',  # FIX: Added email
             password='testpass123',
             role='reader'
         )
         # Subscribe to publisher1 and journalist1 only
         self.reader.subscribed_publishers.add(self.publisher1)
         self.reader.subscribed_journalists.add(self.journalist1)
-        
+
         # Create articles
         self.article1 = Article.objects.create(
             title='Article from subscribed publisher',
@@ -262,7 +273,7 @@ class SubscribedArticlesTest(APITestCase):
             publisher=self.publisher1,
             approved=True
         )
-        
+
         self.article2 = Article.objects.create(
             title='Article from unsubscribed publisher',
             content='Content 2',

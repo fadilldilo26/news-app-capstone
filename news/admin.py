@@ -6,21 +6,21 @@ from .models import CustomUser, Publisher, Article, Newsletter
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     """Custom admin for the CustomUser model."""
-    
+
     # Add 'role' to the fieldsets
     fieldsets = UserAdmin.fieldsets + (
         ('Role & Subscriptions', {
             'fields': ('role', 'subscribed_publishers', 'subscribed_journalists'),
         }),
     )
-    
+
     # Add 'role' to the add form
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Role', {
             'fields': ('role',),
         }),
     )
-    
+
     list_display = ['username', 'email', 'role', 'is_staff']
     list_filter = ['role', 'is_staff']
     search_fields = ['username', 'email']

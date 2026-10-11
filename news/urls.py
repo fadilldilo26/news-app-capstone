@@ -17,7 +17,10 @@ urlpatterns = [
 
     # --- Authentication & Registration ---
     path('register/', register, name='register'),
-    path('accounts/publisher-register/', publisher_register, name='publisher-register'),
+    path(
+        'accounts/publisher-register/',
+        publisher_register,
+        name='publisher-register'),
     path('accounts/logout/', custom_logout, name='logout'),
 
     # --- Article Management ---
@@ -26,10 +29,16 @@ urlpatterns = [
     path('articles/<int:pk>/edit/', edit_article, name='edit-article'),
     path('articles/<int:pk>/delete/', delete_article, name='delete-article'),
     path('articles/<int:pk>/', article_detail_web, name='article-detail-web'),
-    path('articles/<int:pk>/approve/', approve_article_web, name='approve-article-web'),
+    path(
+        'articles/<int:pk>/approve/',
+        approve_article_web,
+        name='approve-article-web'),
     path('feed/', views.my_feed, name='my-feed'),
-    path('articles/<int:pk>/publish/', views.publish_independent_article, name='publish-independent'),
-    
+    path(
+        'articles/<int:pk>/publish/',
+        views.publish_independent_article,
+        name='publish-independent'),
+
     # --- Editor Workflow ---
     path('editor/review/', editor_review, name='editor-review'),
 
@@ -38,12 +47,16 @@ urlpatterns = [
     path('newsletters/create/', create_newsletter, name='create-newsletter'),
 
     # --- Publisher Management ---
-    path('publications/<int:pk>/manage/', manage_publication, name='manage-publication'),
+    path(
+        'publications/<int:pk>/manage/',
+        manage_publication,
+        name='manage-publication'),
     path('publications/setup/', setup_publication, name='setup-publication'),
-    
+
     # --- Reader Subscriptions ---
     path('subscriptions/', manage_subscriptions, name='manage-subscriptions'),
-    path('subscriptions/toggle/<str:content_type>/<int:object_id>/', toggle_subscription, name='toggle-subscription'),
+    path('subscriptions/toggle/<str:content_type>/<int:object_id>/',
+         toggle_subscription, name='toggle-subscription'),
 
     # --- API Endpoints (Modular Include) ---
     # Note: This is mounted at 'api/', so it won't conflict with the root ''

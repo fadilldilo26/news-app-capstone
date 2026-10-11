@@ -15,21 +15,53 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='publisher',
             name='assigned_editors',
-            field=models.ManyToManyField(blank=True, help_text='Editors assigned to work on this publication', limit_choices_to={'role': 'editor'}, related_name='assigned_to_publications_as_editor', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='Editors assigned to work on this publication',
+                limit_choices_to={
+                    'role': 'editor'},
+                related_name='assigned_to_publications_as_editor',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='publisher',
             name='assigned_journalists',
-            field=models.ManyToManyField(blank=True, help_text='Journalists assigned to work on this publication', limit_choices_to={'role': 'journalist'}, related_name='assigned_to_publications_as_journalist', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True,
+                help_text='Journalists assigned to work on this publication',
+                limit_choices_to={
+                    'role': 'journalist'},
+                related_name='assigned_to_publications_as_journalist',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='publisher',
             name='owner',
-            field=models.ForeignKey(blank=True, help_text='The publisher user who owns this publication', limit_choices_to={'role': 'publisher'}, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='owned_publications', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True,
+                help_text='The publisher user who owns this publication',
+                limit_choices_to={
+                    'role': 'publisher'},
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='owned_publications',
+                to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
             model_name='customuser',
             name='role',
-            field=models.CharField(choices=[('reader', 'Reader'), ('editor', 'Editor'), ('journalist', 'Journalist'), ('publisher', 'Publisher')], default='reader', help_text='The role assigned to this user.', max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('reader',
+                     'Reader'),
+                    ('editor',
+                     'Editor'),
+                    ('journalist',
+                     'Journalist'),
+                    ('publisher',
+                     'Publisher')],
+                default='reader',
+                help_text='The role assigned to this user.',
+                max_length=20),
         ),
     ]

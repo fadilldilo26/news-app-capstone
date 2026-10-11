@@ -1,9 +1,14 @@
+import logging
+from .serializers import ArticleSerializer, NewsletterSerializer, PublisherSerializer, UserSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework import viewsets, permissions, status
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.http import HttpResponseForbidden
 from django.contrib import messages
-from django.contrib.auth.models import Group
+from .permissions import IsJournalistOrReadOnly
 
 from .models import Article, Newsletter, CustomUser, Publisher
 from .forms import CustomUserCreationForm
@@ -32,11 +37,12 @@ def custom_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, f'Welcome back, {user.username}!')
-            
+
             if user.role == 'editor':
                 return redirect('editor-review')
             elif user.role == 'publisher':
-                # FIXED: Use owned_publications (matches related_name in models.py)
+                # FIXED: Use owned_publications (matches related_name in
+                # models.py)
                 pub = user.owned_publications.first()
                 if pub:
                     return redirect('manage-publication', pk=pub.pk)
@@ -90,14 +96,18 @@ def publisher_register(request):
                     description=f"Publication owned by {user.username}"
                 )
                 messages.success(
-                    request, 
-                    f'Welcome, {user.username}! Your publication "{publication.name}" has been created.'
+                    request,
+                    f'Welcome, {
+                        user.username}! Your publication "{
+                        publication.name}" has been created.'
                 )
             else:
                 publication = user.owned_publications.first()
                 messages.info(
-                    request, 
-                    f'Welcome back, {user.username}! Your publication "{publication.name}" is ready.'
+                    request,
+                    f'Welcome back, {
+                        user.username}! Your publication "{
+                        publication.name}" is ready.'
                 )
 
             login(request, user)
@@ -119,8 +129,9 @@ def article_list_web(request):
     if user.role == 'journalist':
         articles = Article.objects.filter(author=user).order_by('-created_at')
     else:
-        articles = Article.objects.filter(approved=True).order_by('-created_at')
-    
+        articles = Article.objects.filter(
+            approved=True).order_by('-created_at')
+
     return render(request, 'news/article_list.html', {'articles': articles})
 
 
@@ -137,16 +148,17 @@ def create_article(request):
         publisher_id = request.POST.get('publisher')
 
         if title and content:
-            # FIX #3: Auto-approve if no publisher is selected (Independent Article)
+            # FIX #3: Auto-approve if no publisher is selected (Independent
+            # Article)
             is_independent = (not publisher_id or publisher_id == '')
-            
+
             article = Article.objects.create(
                 title=title,
                 content=content,
                 author=request.user,
-                approved=is_independent # True if independent, False if linked to publisher
+                approved=is_independent  # True if independent, False if linked to publisher
             )
-            
+
             # Only link publisher if one was actually selected
             if not is_independent:
                 try:
@@ -155,21 +167,22 @@ def create_article(request):
                     article.save()
                 except Publisher.DoesNotExist:
                     pass
-            
+
             messages.success(request, 'Article submitted successfully!')
             return redirect('/articles/')
         else:
             messages.error(request, 'Title and Content are required.')
 
     publishers = Publisher.objects.all()
-    return render(request, 'news/create_article.html', {'publishers': publishers})
+    return render(request, 'news/create_article.html',
+                  {'publishers': publishers})
 
 
 @login_required
 def edit_article(request, pk):
     """Allow journalists to edit their own articles."""
     article = get_object_or_404(Article, pk=pk)
-    
+
     if article.author != request.user:
         messages.error(request, 'You can only edit your own articles.')
         return redirect('/articles/')
@@ -177,7 +190,7 @@ def edit_article(request, pk):
     if request.method == 'POST':
         title = request.POST.get('title')
         content = request.POST.get('content')
-        
+
         if title and content:
             article.title = title
             article.content = content
@@ -195,7 +208,7 @@ def edit_article(request, pk):
 def delete_article(request, pk):
     """Allow journalists to delete their own articles."""
     article = get_object_or_404(Article, pk=pk)
-    
+
     if article.author != request.user:
         messages.error(request, 'You can only delete your own articles.')
         return redirect('/articles/')
@@ -205,7 +218,8 @@ def delete_article(request, pk):
         messages.success(request, 'Article deleted successfully.')
         return redirect('/articles/')
 
-    return render(request, 'news/confirm_delete_article.html', {'article': article})
+    return render(request, 'news/confirm_delete_article.html',
+                  {'article': article})
 
 
 @login_required
@@ -223,8 +237,10 @@ def editor_review(request):
     """Editor-only view showing all PENDING articles for review."""
     if not is_editor(request.user):
         return redirect('/articles/')
-    pending_articles = Article.objects.filter(approved=False).order_by('-created_at')
-    return render(request, 'news/editor_review.html', {'pending_articles': pending_articles})
+    pending_articles = Article.objects.filter(
+        approved=False).order_by('-created_at')
+    return render(request, 'news/editor_review.html',
+                  {'pending_articles': pending_articles})
 
 
 @login_required
@@ -238,7 +254,9 @@ def approve_article_web(request, pk):
     else:
         article.approved = True
         article.save()
-        messages.success(request, f'Article "{article.title}" has been approved!')
+        messages.success(
+            request, f'Article "{
+                article.title}" has been approved!')
     return redirect('editor-review')
 
 
@@ -248,27 +266,27 @@ def my_feed(request):
     if request.user.role != 'reader':
         messages.error(request, "Only readers can access My Feed.")
         return redirect('/articles/')
-    
+
     # Get articles from subscribed publishers
     pub_articles = Article.objects.filter(
         approved=True,
         publisher__in=request.user.subscribed_publishers.all()
     )
-    
+
     # Get articles from subscribed journalists (independent articles)
     journalist_articles = Article.objects.filter(
         approved=True,
         author__in=request.user.subscribed_journalists.all(),
-        publisher__isnull=True # Only independent articles
+        publisher__isnull=True  # Only independent articles
     )
-    
+
     # Combine and order by date
     from django.db.models import Q
     articles = Article.objects.filter(
-        Q(id__in=pub_articles.values('id')) | 
+        Q(id__in=pub_articles.values('id')) |
         Q(id__in=journalist_articles.values('id'))
     ).distinct().order_by('-created_at')
-    
+
     return render(request, 'news/my_feed.html', {'articles': articles})
 
 
@@ -283,38 +301,43 @@ def newsletter_list_web(request):
         messages.error(request, 'You do not have permission.')
         return redirect('article-list')
     newsletters = Newsletter.objects.all().order_by('-created_at')
-    return render(request, 'news/newsletter_list.html', {'newsletters': newsletters})
+    return render(request, 'news/newsletter_list.html',
+                  {'newsletters': newsletters})
 
 
 @login_required
 def create_newsletter(request):
     """Allow journalists and editors to create a new newsletter."""
     if request.user.role not in ['journalist', 'editor']:
-        messages.error(request, 'Only journalists and editors can create newsletters.')
+        messages.error(
+            request,
+            'Only journalists and editors can create newsletters.')
         return redirect('/newsletters/')
 
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
         article_ids = request.POST.getlist('articles')
-        
+
         if title:
             newsletter = Newsletter.objects.create(
                 title=title,
                 description=description,
                 author=request.user
             )
-            
+
             if article_ids:
                 newsletter.articles.set(article_ids)
-            
+
             messages.success(request, 'Newsletter created successfully!')
             return redirect('/newsletters/')
         else:
             messages.error(request, 'Title is required.')
 
-    available_articles = Article.objects.filter(approved=True).order_by('-created_at')
-    return render(request, 'news/create_newsletter.html', {'articles': available_articles})
+    available_articles = Article.objects.filter(
+        approved=True).order_by('-created_at')
+    return render(request, 'news/create_newsletter.html',
+                  {'articles': available_articles})
 
 
 @login_required
@@ -325,10 +348,15 @@ def manage_subscriptions(request):
         return redirect('/articles/')
 
     publishers = Publisher.objects.all().order_by('name')
-    journalists = CustomUser.objects.filter(role='journalist').order_by('username')
+    journalists = CustomUser.objects.filter(
+        role='journalist').order_by('username')
 
-    subscribed_publishers = set(request.user.subscribed_publishers.values_list('id', flat=True))
-    subscribed_journalists = set(request.user.subscribed_journalists.values_list('id', flat=True))
+    subscribed_publishers = set(
+        request.user.subscribed_publishers.values_list(
+            'id', flat=True))
+    subscribed_journalists = set(
+        request.user.subscribed_journalists.values_list(
+            'id', flat=True))
 
     context = {
         'publishers': publishers,
@@ -353,12 +381,15 @@ def toggle_subscription(request, content_type, object_id):
         else:
             request.user.subscribed_publishers.add(pub)
             messages.success(request, f'Subscribed to "{pub.name}"!')
-            
+
     elif content_type == 'journalist':
-        journalist = get_object_or_404(CustomUser, pk=object_id, role='journalist')
+        journalist = get_object_or_404(
+            CustomUser, pk=object_id, role='journalist')
         if journalist in request.user.subscribed_journalists.all():
             request.user.subscribed_journalists.remove(journalist)
-            messages.success(request, f'Unsubscribed from {journalist.username}.')
+            messages.success(
+                request, f'Unsubscribed from {
+                    journalist.username}.')
         else:
             request.user.subscribed_journalists.add(journalist)
             messages.success(request, f'Subscribed to {journalist.username}!')
@@ -373,22 +404,24 @@ def manage_publication(request, pk):
     """Allows a Publisher to view and manage their publication."""
     publication = get_object_or_404(Publisher, pk=pk)
     if publication.owner != request.user:
-        messages.error(request, 'You do not have permission to manage this publication.')
+        messages.error(
+            request,
+            'You do not have permission to manage this publication.')
         return redirect('article-list')
 
     if request.method == 'POST':
         editor_ids = request.POST.getlist('editors')
         publication.assigned_editors.set(editor_ids)
-        
+
         journalist_ids = request.POST.getlist('journalists')
         publication.assigned_journalists.set(journalist_ids)
-        
+
         messages.success(request, 'Staff assignments updated successfully!')
         return redirect('manage-publication', pk=pk)
 
     available_editors = CustomUser.objects.filter(role='editor')
     available_journalists = CustomUser.objects.filter(role='journalist')
-    
+
     context = {
         'publication': publication,
         'available_editors': available_editors,
@@ -403,26 +436,27 @@ def setup_publication(request):
     if request.user.role != 'publisher':
         messages.error(request, "Only publishers can set up publications.")
         return redirect('/articles/')
-    
+
     existing_pub = Publisher.objects.filter(owner=request.user).first()
     if existing_pub:
         return redirect('manage-publication', pk=existing_pub.pk)
-        
+
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description', '')
-        
+
         if name:
             Publisher.objects.create(
-                name=name, 
+                name=name,
                 owner=request.user,
                 description=description
             )
-            messages.success(request, f"'{name}' has been created successfully!")
+            messages.success(
+                request, f"'{name}' has been created successfully!")
             return redirect('/articles/')
         else:
             messages.error(request, "Publication name is required.")
-            
+
     return render(request, 'news/setup_publication.html')
 
 
@@ -430,18 +464,13 @@ def setup_publication(request):
 # DRF API VIEWSETS
 # ===========================
 
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.response import Response
-from .serializers import ArticleSerializer, NewsletterSerializer, PublisherSerializer, UserSerializer
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsJournalistOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -469,12 +498,14 @@ class ArticleViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'],
+            permission_classes=[permissions.IsAuthenticated])
     def approve(self, request, pk=None):
         article = self.get_object()
         article.approved = True
         article.save()
-        return Response({'status': 'Article approved', 'article_id': article.id})
+        return Response({'status': 'Article approved',
+                        'article_id': article.id})
 
 
 class NewsletterViewSet(viewsets.ModelViewSet):
@@ -490,7 +521,8 @@ class NewsletterViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         article = self.get_object()
-        return Response({'status': 'Article approved', 'article_id': article.id}, status=status.HTTP_200_OK)
+        return Response({'status': 'Article approved',
+                        'article_id': article.id}, status=status.HTTP_200_OK)
 
 
 class PublisherViewSet(viewsets.ReadOnlyModelViewSet):
@@ -512,26 +544,29 @@ def approved_articles_log(request):
     title = request.data.get('title')
     author = request.data.get('author')
     publisher = request.data.get('publisher')
-    logger.info(f"Article approved: ID={article_id}, Title='{title}', Author={author}, Publisher={publisher}")
+    logger.info(
+        f"Article approved: ID={article_id}, Title='{title}', Author={author}, Publisher={publisher}")
     return Response({
         'status': 'logged',
         'article_id': article_id,
         'message': f'Article "{title}" has been logged as approved.'
     }, status=status.HTTP_201_CREATED)
-    
-    
+
+
 @login_required
 def publish_independent_article(request, pk):
     """Allow journalists to publish their own pending independent articles."""
     if request.method != 'POST':
         return HttpResponseForbidden()
-    
+
     # Get the article, ensuring it belongs to the current user
     article = get_object_or_404(Article, pk=pk, author=request.user)
-    
+
     # Safety check: Only allow publishing if it has NO publisher
     if article.publisher:
-        messages.error(request, "Articles linked to a publisher must be approved by an editor.")
+        messages.error(
+            request,
+            "Articles linked to a publisher must be approved by an editor.")
     elif article.approved:
         messages.info(request, "This article is already published.")
     else:
@@ -539,5 +574,5 @@ def publish_independent_article(request, pk):
         article.approved = True
         article.save()
         messages.success(request, "Article published successfully!")
-        
+
     return redirect('/articles/')
