@@ -68,10 +68,8 @@
                     <a href="{% url 'create-article' %}">Write Article</a>
                 {% endif %}
                 
-                <!-- Editor & Journalist Links -->
-                {% if user.role == 'editor' or user.role == 'journalist' %}
-                    <a href="/newsletters/">Newsletters</a>
-                {% endif %}
+                <!-- Newsletter Link (visible to all logged-in roles) -->
+            <a href="/newsletters/">Newsletters</a>
                 
                 <!-- Editor Links -->
                 {% if user.role == 'editor' %}

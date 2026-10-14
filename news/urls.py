@@ -45,7 +45,10 @@ urlpatterns = [
     # --- Newsletter Management ---
     path('newsletters/', newsletter_list_web, name='newsletter-list'),
     path('newsletters/create/', create_newsletter, name='create-newsletter'),
-
+    path('newsletters/<int:pk>/', views.newsletter_detail_web, name='newsletter-detail'),
+    path('newsletters/<int:pk>/edit/', views.edit_newsletter, name='edit-newsletter'),
+    path('newsletters/<int:pk>/delete/', views.delete_newsletter, name='delete-newsletter'),
+    
     # --- Publisher Management ---
     path(
         'publications/<int:pk>/manage/',

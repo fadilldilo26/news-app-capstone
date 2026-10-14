@@ -52,10 +52,10 @@
                         <a href="/articles/{{ article.id }}/" class="btn btn-primary w-100 mb-2">Read More &rarr;</a>
                         
                         <!-- Edit & Delete Buttons (Only visible to author) -->
-                        {% if user == article.author %}
+                        {% if user == article.author or user.role == 'editor' or user.role == 'publisher' %}
                         <div class="d-flex gap-2 mt-2">
                             <a href="/articles/{{ article.id }}/edit/" class="btn btn-outline-warning btn-sm flex-grow-1">
-                                ✏️ Edit
+                                ✏️ Editor
                             </a>
                             <a href="{% url 'delete-article' article.id %}" class="btn btn-outline-danger btn-sm flex-grow-1">
                                 🗑️ Delete

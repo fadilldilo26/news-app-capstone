@@ -1,0 +1,43 @@
+{% extends "news/base.html" %}
+
+{% block title %}{{ newsletter.title }} - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title">{{ newsletter.title }}</h1>
+
+            <div class="article-meta text-muted small mb-3">
+                By <strong>{{ newsletter.author.username }}</strong>
+            </div>
+
+            <div class="article-content mt-3" style="line-height: 1.8;">
+                {{ newsletter.description|linebreaks }}
+            </div>
+
+            <h4 class="mt-4">📰 Articles in this newsletter</h4>
+            {% if newsletter.articles.all %}
+                <ul class="list-group mt-2">
+                    {% for article in newsletter.articles.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/articles/{{ article.id }}/">{{ article.title }}</a>
+                        <span class="text-muted small">by {{ article.author.username }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted mt-2">No articles included yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card-footer bg-white border-top-0">
+            <a href="/newsletters/" class="btn btn-primary">← Back to Newsletters</a>
+            {% if user == newsletter.author or user.role == 'editor' or user.role == 'publisher' %}
+                <a href="{% url 'edit-newsletter' newsletter.id %}" class="btn btn-outline-warning">✏️ Edit</a>
+                <a href="{% url 'delete-newsletter' newsletter.id %}" class="btn btn-outline-danger">🗑️ Delete</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

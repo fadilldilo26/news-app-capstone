@@ -1,0 +1,33 @@
+{% extends "news/base.html" %}
+
+{% block title %}Edit Newsletter - NewsApp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-warning">✏️ Edit Newsletter</h2>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                   value="{{ newsletter.title }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description"
+                                      rows="4" required>{{ newsletter.description }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">💾 Save Changes</button>
+                        <a href="/newsletters/" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

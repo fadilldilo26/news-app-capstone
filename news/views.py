@@ -183,8 +183,8 @@ def edit_article(request, pk):
     """Allow journalists to edit their own articles."""
     article = get_object_or_404(Article, pk=pk)
 
-    if article.author != request.user:
-        messages.error(request, 'You can only edit your own articles.')
+    if article.author != request.user and request.user.role not in ('editor', 'publisher'):
+        messages.error(request, 'You do not have permission to edit this article.')
         return redirect('/articles/')
 
     if request.method == 'POST':
@@ -209,8 +209,8 @@ def delete_article(request, pk):
     """Allow journalists to delete their own articles."""
     article = get_object_or_404(Article, pk=pk)
 
-    if article.author != request.user:
-        messages.error(request, 'You can only delete your own articles.')
+    if article.author != request.user and request.user.role not in ('editor', 'publisher'):
+        messages.error(request, 'You do not have permission to edit this article.')
         return redirect('/articles/')
 
     if request.method == 'POST':
@@ -296,10 +296,7 @@ def my_feed(request):
 
 @login_required
 def newsletter_list_web(request):
-    """Display list of newsletters (journalists and editors only)."""
-    if request.user.role not in ['journalist', 'editor']:
-        messages.error(request, 'You do not have permission.')
-        return redirect('article-list')
+    """Display a list of newsletters. Accessible to all authenticated users.""" 
     newsletters = Newsletter.objects.all().order_by('-created_at')
     return render(request, 'news/newsletter_list.html',
                   {'newsletters': newsletters})
@@ -576,3 +573,44 @@ def publish_independent_article(request, pk):
         messages.success(request, "Article published successfully!")
 
     return redirect('/articles/')
+
+
+@login_required
+def newsletter_detail_web(request, pk):
+    """Display a single newsletter and its articles (all roles)."""
+    newsletter = get_object_or_404(Newsletter, pk=pk)
+    return render(request, 'news/newsletter_detail.html', {'newsletter': newsletter})
+
+
+@login_required
+def edit_newsletter(request, pk):
+    """Allow the author, editors, and publishers to edit a newsletter."""
+    newsletter = get_object_or_404(Newsletter, pk=pk)
+    if request.user != newsletter.author and request.user.role not in ('editor', 'publisher'):
+        messages.error(request, 'You do not have permission to edit this newsletter.')
+        return redirect('/newsletters/')
+
+    if request.method == 'POST':
+        newsletter.title = request.POST.get('title', newsletter.title)
+        newsletter.description = request.POST.get('description', newsletter.description)
+        newsletter.save()
+        messages.success(request, 'Newsletter updated successfully!')
+        return redirect('/newsletters/')
+
+    return render(request, 'news/edit_newsletter.html', {'newsletter': newsletter})
+
+
+@login_required
+def delete_newsletter(request, pk):
+    """Allow the author, editors, and publishers to delete a newsletter."""
+    newsletter = get_object_or_404(Newsletter, pk=pk)
+    if request.user != newsletter.author and request.user.role not in ('editor', 'publisher'):
+        messages.error(request, 'You do not have permission to delete this newsletter.')
+        return redirect('/newsletters/')
+
+    if request.method == 'POST':
+        newsletter.delete()
+        messages.success(request, 'Newsletter deleted successfully!')
+        return redirect('/newsletters/')
+
+    return render(request, 'news/confirm_delete_newsletter.html', {'newsletter': newsletter})
